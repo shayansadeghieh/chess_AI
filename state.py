@@ -8,7 +8,7 @@ class State(object):
         return self.board.legal_moves 
     
     def value(self):
-        return 1
+        return 0
 
 if __name__ == "__main__":
     s = State()
