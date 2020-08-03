@@ -11,18 +11,23 @@ class State(object):
     def serialize(self):
         assert self.board.is_valid()
  
-        bstate = np.zeros(64)
+        bstate = np.zeros(64, np.uint8)
+        for i in range(64):
+            pp = self.board.piece_at(i)
+            if pp is not None:
+                print(pp)
+                pass
+        
+        bstate = bstate.reshape(8,8)
+        exit(0)
 
         state = np.zeros((8,8,5))
 
-        for r in range(8):
-            for c in range(8):
-                state[r,c,0] = (bstate[r*8+c]/8)&1
-                state[r,c,1] = (bstate[r*8+c]/4)&1
-                state[r,c,2] = (bstate[r*8+c]/2)&1
-                state[r,c,3] = (bstate[r*8+c]/1)&1
 
-        
+        state[:,:,0] = (bstate>>3)&1
+        state[:,:,1] = (bstate>>2)&1
+        state[:,:,2] = (bstate>>1)&1
+        state[:,:,3] = (bstate>>0)&1
 
         #Fourth column is who's turn it is
         state[:, :, 4] = (self.board.turn*1.)
