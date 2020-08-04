@@ -28,8 +28,15 @@ def get_dataset(num_samples = None):
             if num_samples is not None and len(X) > num_samples:
                 return X,Y
             gn+=1
-    return X,Y 
+    return X,Y
+
+import h5py 
+
 
 if __name__ == "__main__":
-    X, Y = get_dataset(num_samples = 1000)
+    X, Y = get_dataset(1000)
+    np.savez("processed/dataset.npz", X, Y)
+    # h5 = h5py.File('processed/trainme.h5', 'w')
+    # h5.create_dataset('X', X)
+
 
