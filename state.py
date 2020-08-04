@@ -37,16 +37,16 @@ class State(object):
         bstate = bstate.reshape(8,8)
         # exit(0)
 
-        state = np.zeros((8,8,5))
+        state = np.zeros((5,8,8))
 
 
-        state[:,:,0] = (bstate>>3)&1
-        state[:,:,1] = (bstate>>2)&1
-        state[:,:,2] = (bstate>>1)&1
-        state[:,:,3] = (bstate>>0)&1
+        state[0] = (bstate>>3)&1
+        state[1] = (bstate>>2)&1
+        state[2] = (bstate>>1)&1
+        state[3] = (bstate>>0)&1
 
         #Fourth column is who's turn it is
-        state[:, :, 4] = (self.board.turn*1.)
+        state[4] = (self.board.turn*1.)
 
         return state
     
