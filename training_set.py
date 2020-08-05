@@ -10,11 +10,10 @@ def get_dataset(num_samples = None):
     for fn in os.listdir('data'):
         pgn = open(os.path.join('data', fn))
         while 1:
-            try:
-                #Parse and extract each individual game from the pgn file, handles headers/ no headers
-                game = chess.pgn.read_game(pgn) 
-            except Exception:
-                break
+            #Parse and extract each individual game from the pgn file, handles headers/ no headers
+            game = chess.pgn.read_game(pgn) 
+            if game is None:
+                continue
             #Developed value notation: 0 means draw, -1 means black won, 1 means white and * means ongoing game (who cares)
             res = game.headers["Result"]
             if res not in values:
@@ -38,8 +37,8 @@ import h5py
 
 
 if __name__ == "__main__":
-    X, Y = get_dataset(1E5)
-    np.savez("processed/dataset_100K.npz", X, Y)
+    X, Y = get_dataset(1E6)
+    np.savez("processed/dataset_1M.npz", X, Y)
     # h5 = h5py.File('processed/trainme.h5', 'w')
     # h5.create_dataset('X', X)
 

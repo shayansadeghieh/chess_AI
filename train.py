@@ -7,7 +7,7 @@ import numpy as np
 class ChessValueDataset(Dataset):
     def __init__(self):
         '''Init data and target outcomes'''
-        dat = np.load("processed/dataset_1000.npz")  
+        dat = np.load("processed/dataset_100K.npz")  
         self.X = dat['arr_0']
         self.Y = dat['arr_1']
         print("loaded", self.X.shape, self.Y.shape)
@@ -16,12 +16,8 @@ class ChessValueDataset(Dataset):
         '''Upperbound specified in this method'''
         return self.X.shape[0]
     
-    # def __getitem__(self, idx):
-    #     return {'X' : self.X[idx], 'Y' : self.Y[idx]}
     def __getitem__(self, idx):
-        X = self.X[idx]
-        Y = self.Y[idx]
-        return X,Y
+        return (self.X[idx], self.Y[idx])
 
 class Net(nn.Module):
     def __init__(self):
@@ -30,9 +26,9 @@ class Net(nn.Module):
         self.a2 = nn.Conv2d(16, 16, kernel_size = 3, padding = 1)
         self.a3 = nn.Conv2d(16, 32, kernel_size = 3, stride = 2)
 
-        self.b1 = nn.Conv2d(32, 32, kernel_size = 2, padding = 1)
-        self.b2 = nn.Conv2d(32, 32, kernel_size = 2, padding = 1)
-        self.b3 = nn.Conv2d(32, 64, kernel_size = 2, stride = 2)
+        self.b1 = nn.Conv2d(32, 32, kernel_size = 3, padding = 1)
+        self.b2 = nn.Conv2d(32, 32, kernel_size = 3, padding = 1)
+        self.b3 = nn.Conv2d(32, 64, kernel_size = 3, stride = 2)
 
         self.c1 = nn.Conv2d(64, 64, kernel_size = 2, padding = 1)
         self.c2 = nn.Conv2d(64, 64, kernel_size = 2, padding = 1)
@@ -64,12 +60,11 @@ class Net(nn.Module):
         x = x.view(-1, 128)
         x = self.last(x)
 
-        return F.tanh(x)
+        return torch.tanh(x)
 
 if __name__ == "__main__":
 
     chess_dataset = ChessValueDataset()
-    # X, y = ChessValueDataset()
     train_loader = torch.utils.data.DataLoader(chess_dataset, batch_size=256, shuffle=True)
     model = Net()
     optimizer = torch.optim.Adam(model.parameters())
@@ -84,20 +79,24 @@ if __name__ == "__main__":
         print('current epoch %d' % epoch)
         all_loss = 0
         num_loss = 0
-        for data, target in train_loader:
+
+        for batch_idx, (data, target) in enumerate(train_loader):
             # print(local_batch,  local_labels)
-            # target = target.unsqueeze(-1)
+            target = target.unsqueeze(-1)
             data, target = data.to(device), target.to(device)
             data = data.float()
             target = target.float()
+
             optimizer.zero_grad()
             output = model(data)
+
             loss = floss(output, target)
             loss.backward()
             optimizer.step()
 
             all_loss += loss.item()
             num_loss += 1
+            # print('loss',loss.data[0])
 
         print("%3d: %f" % (epoch, all_loss/num_loss))
         torch.save(model.state_dict(), "nets/value.pth")
